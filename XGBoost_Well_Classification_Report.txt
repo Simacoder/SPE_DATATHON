@@ -27,80 +27,94 @@
     ==============================
     
 Reservoir Name:
-  - subsample: 0.8
-  - reg_lambda: 1
-  - reg_alpha: 0
-  - n_estimators: 150
-  - max_depth: 6
-  - learning_rate: 0.1
-  - colsample_bytree: 0.8
-
-Reservoir Type:
-  - subsample: 0.9
-  - reg_lambda: 2
-  - reg_alpha: 0
-  - n_estimators: 200
-  - max_depth: 6
-  - learning_rate: 0.1
-  - colsample_bytree: 0.9
-
-Well Type:
-  - subsample: 0.8
-  - reg_lambda: 1
+  - subsample: 0.6
+  - reg_lambda: 1.5
   - reg_alpha: 0.1
   - n_estimators: 100
+  - min_child_weight: 5
+  - max_depth: 8
+  - learning_rate: 0.001
+  - gamma: 0.4
+  - colsample_bytree: 1.0
+
+Reservoir Type:
+  - subsample: 0.6
+  - reg_lambda: 2
+  - reg_alpha: 1
+  - n_estimators: 150
+  - min_child_weight: 1
   - max_depth: 4
   - learning_rate: 0.1
-  - colsample_bytree: 0.7
+  - gamma: 0.4
+  - colsample_bytree: 0.8
+
+Well Type:
+  - subsample: 0.9
+  - reg_lambda: 0.5
+  - reg_alpha: 0
+  - n_estimators: 50
+  - min_child_weight: 1
+  - max_depth: 5
+  - learning_rate: 0.2
+  - gamma: 0.4
+  - colsample_bytree: 0.6
 
 Production Type:
-  - subsample: 0.9
-  - reg_lambda: 1
-  - reg_alpha: 0.5
-  - n_estimators: 100
-  - max_depth: 4
-  - learning_rate: 0.1
-  - colsample_bytree: 0.9
+  - subsample: 0.6
+  - reg_lambda: 0.5
+  - reg_alpha: 0.1
+  - n_estimators: 50
+  - min_child_weight: 1
+  - max_depth: 3
+  - learning_rate: 0.2
+  - gamma: 0.1
+  - colsample_bytree: 0.6
 
 Formation GOR Trend:
   - subsample: 0.9
   - reg_lambda: 2
-  - reg_alpha: 0.5
-  - n_estimators: 100
-  - max_depth: 5
+  - reg_alpha: 0.1
+  - n_estimators: 250
+  - min_child_weight: 3
+  - max_depth: 8
   - learning_rate: 0.01
-  - colsample_bytree: 1.0
+  - gamma: 0.3
+  - colsample_bytree: 0.6
 
 Watercut Trend:
-  - subsample: 0.8
-  - reg_lambda: 1
-  - reg_alpha: 0
-  - n_estimators: 150
-  - max_depth: 6
-  - learning_rate: 0.2
+  - subsample: 0.6
+  - reg_lambda: 2
+  - reg_alpha: 0.1
+  - n_estimators: 250
+  - min_child_weight: 1
+  - max_depth: 4
+  - learning_rate: 0.1
+  - gamma: 0.3
   - colsample_bytree: 0.9
 
 Oil Productivity Index Trend:
-  - subsample: 0.9
+  - subsample: 0.6
   - reg_lambda: 2
-  - reg_alpha: 0
-  - n_estimators: 200
-  - max_depth: 6
+  - reg_alpha: 1
+  - n_estimators: 150
+  - min_child_weight: 1
+  - max_depth: 4
   - learning_rate: 0.1
-  - colsample_bytree: 0.9
+  - gamma: 0.4
+  - colsample_bytree: 0.8
 
 
     MODEL PERFORMANCE:
     ==================
-    - Reservoir Name: 1.000
+    - Reservoir Name: 0.200
 - Reservoir Type: 1.000
 - Well Type: 1.000
 - Production Type: 1.000
-- Formation GOR Trend: 1.000
+- Formation GOR Trend: 0.900
 - Watercut Trend: 1.000
 - Oil Productivity Index Trend: 1.000
 
-Overall Average Accuracy: 1.000
+Overall Average Accuracy: 0.871
 
 
     FEATURE ENGINEERING:

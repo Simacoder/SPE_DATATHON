@@ -11,7 +11,7 @@ import seaborn as sns
 from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split, cross_val_score, RandomizedSearchCV, StratifiedKFold
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
 from sklearn.utils.class_weight import compute_sample_weight
 import warnings
 warnings.filterwarnings('ignore')
@@ -499,7 +499,7 @@ class WellClassificationPipeline:
         return results_df, reservoir_prod
 
     def train_xgboost_model(self):
-        """Train XGBoost model with hyperparameter tuning"""
+        """Train XGBoost model with hyperparameter tuning with enhanced evaluation"""
         print("\nTraining XGBoost model with hyperparameter tuning...")
 
         # Prepare target variables
@@ -520,15 +520,17 @@ class WellClassificationPipeline:
         if not valid_targets:
             raise ValueError("No valid targets with multiple classes for classification")
 
-        # Parameter space for tuning
+        # Enhanced parameter space for tuning
         param_grid = {
-            'n_estimators': [50, 100, 150, 200],
-            'max_depth': [3, 4, 5, 6],
-            'learning_rate': [0.01, 0.1, 0.2, 0.3],
-            'subsample': [0.7, 0.8, 0.9, 1.0],
-            'colsample_bytree': [0.7, 0.8, 0.9, 1.0],
-            'reg_alpha': [0, 0.1, 0.5],
-            'reg_lambda': [1, 1.5, 2]
+            'n_estimators': [50, 100, 150, 200, 250],
+            'max_depth': [3, 4, 5, 6, 7, 8],
+            'learning_rate': [0.001, 0.01, 0.05, 0.1, 0.2],
+            'subsample': [0.6, 0.7, 0.8, 0.9, 1.0],
+            'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1.0],
+            'gamma': [0, 0.1, 0.2, 0.3, 0.4],
+            'min_child_weight': [1, 3, 5],
+            'reg_alpha': [0, 0.1, 0.5, 1],
+            'reg_lambda': [0.5, 1, 1.5, 2]
         }
 
         # Train individual models for each target
@@ -538,6 +540,7 @@ class WellClassificationPipeline:
             print(f"\nTuning XGBoost for target: {target_col}")
             
             n_classes = len(np.unique(y_encoded[target_col]))
+            class_names = self.label_encoders[target_col].classes_
             
             model = XGBClassifier(
                 objective='multi:softprob' if n_classes > 2 else 'binary:logistic',
@@ -545,7 +548,8 @@ class WellClassificationPipeline:
                 eval_metric='mlogloss' if n_classes > 2 else 'logloss',
                 use_label_encoder=False,
                 verbosity=0,
-                random_state=42
+                random_state=42,
+                early_stopping_rounds=10
             )
 
             # Use stratified k-fold for classification
@@ -554,11 +558,11 @@ class WellClassificationPipeline:
             # Compute sample weights for class imbalance
             sample_weights = compute_sample_weight('balanced', y_encoded[target_col])
             
-            # Randomized search for hyperparameter tuning
+            # Randomized search for hyperparameter tuning with more iterations
             search = RandomizedSearchCV(
                 model,
                 param_distributions=param_grid,
-                n_iter=20,
+                n_iter=50,  # Increased from 20 to 50 for better exploration
                 cv=cv,
                 scoring='accuracy',
                 random_state=42,
@@ -566,23 +570,72 @@ class WellClassificationPipeline:
                 verbose=1
             )
 
-            search.fit(self.X_scaled, y_encoded[target_col], sample_weight=sample_weights)
+            search.fit(self.X_scaled, y_encoded[target_col], 
+                    sample_weight=sample_weights,
+                    eval_set=[(self.X_scaled, y_encoded[target_col])],
+                    verbose=False)
+            
             self.models[target_col] = search.best_estimator_
             self.best_params[target_col] = search.best_params_
 
             print(f"Best params for {target_col}: {search.best_params_}")
             print(f"Best CV score: {search.best_score_:.3f}")
 
-        # Evaluate performance on training data
+            # Enhanced evaluation on training data
+            y_pred = self.models[target_col].predict(self.X_scaled)
+            y_proba = self.models[target_col].predict_proba(self.X_scaled)
+            
+            # Calculate metrics
+            accuracy = accuracy_score(y_encoded[target_col], y_pred)
+            f1 = f1_score(y_encoded[target_col], y_pred, average='weighted')
+            cm = confusion_matrix(y_encoded[target_col], y_pred)
+            
+            print(f"\nEvaluation for {target_col}:")
+            print(f"Accuracy: {accuracy:.4f}")
+            print(f"Weighted F1 Score: {f1:.4f}")
+            print("\nConfusion Matrix:")
+            print(cm)
+            
+            # Print classification report
+            print("\nClassification Report:")
+            print(classification_report(y_encoded[target_col], y_pred, target_names=class_names))
+            
+            # Add confidence analysis
+            max_proba = np.max(y_proba, axis=1)
+            print(f"\nPrediction Confidence Analysis:")
+            print(f"Average confidence for correct predictions: {np.mean(max_proba[y_pred == y_encoded[target_col]]):.4f}")
+            print(f"Average confidence for incorrect predictions: {np.mean(max_proba[y_pred != y_encoded[target_col]]):.4f}")
+            
+            # Store evaluation metrics
+            self.models[target_col].training_metrics = {
+                'accuracy': accuracy,
+                'f1_score': f1,
+                'confusion_matrix': cm,
+                'classification_report': classification_report(y_encoded[target_col], y_pred, target_names=class_names, output_dict=True)
+            }
+
+        # Overall evaluation
         accuracies = {}
+        f1_scores = {}
         for target_col in valid_targets:
             y_pred = self.models[target_col].predict(self.X_scaled)
-            acc = accuracy_score(y_encoded[target_col], y_pred)
-            accuracies[target_col] = acc
-            print(f"Accuracy for {target_col}: {acc:.3f}")
+            accuracies[target_col] = accuracy_score(y_encoded[target_col], y_pred)
+            f1_scores[target_col] = f1_score(y_encoded[target_col], y_pred, average='weighted')
 
-        print(f"\nOverall mean accuracy: {np.mean(list(accuracies.values())):.3f}")
-        
+        print("\nOverall Performance Summary:")
+        print(f"Mean accuracy: {np.mean(list(accuracies.values())):.4f}")
+        print(f"Mean weighted F1 score: {np.mean(list(f1_scores.values())):.4f}")
+
+        # Feature importance analysis
+        for target_col in valid_targets:
+            print(f"\nFeature Importance for {target_col}:")
+            importances = self.models[target_col].feature_importances_
+            indices = np.argsort(importances)[::-1]
+            
+            print("Top 10 Important Features:")
+            for i in range(min(10, len(indices))):
+                print(f"{i+1}. Feature {indices[i]} - Importance: {importances[indices[i]]:.4f}")
+            
     def explain_xgboost_model(self):
         """Explain XGBoost model and feature importance"""
         print("\n" + "="*50)

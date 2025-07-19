@@ -1,0 +1,21 @@
+WELL_NAME,RESERVOIR,Reservoir Type,Well Type,Production Type,Formation GOR Trend,Watercut Trend,Oil Productivity Index Trend
+Well_#1,MAKO,Unknown,Unknown,Unknown,Combo,Decr,Decr
+Well_#10,KEMA,Unknown,Unknown,Unknown,Combo,Decr,Decr
+Well_#11,DEPU,Unknown,Unknown,Unknown,Unknown,Combo,Combo
+Well_#12,,Unknown,Unknown,Unknown,Unknown,Unknown,Unknown
+Well_#13,,Unknown,Unknown,Unknown,Unknown,Unknown,Unknown
+Well_#14,DEPU,Unknown,Unknown,Unknown,Unknown,Combo,Combo
+Well_#15,MAKO,Unknown,Unknown,Unknown,Combo,Decr,Decr
+Well_#16,ACHI,Saturated,NF,Steady,aSolGOR,Flat,Flat
+Well_#17,,Unknown,Unknown,Unknown,Unknown,Unknown,Unknown
+Well_#18,DEPU,Unknown,Unknown,Unknown,Unknown,Combo,Combo
+Well_#19,KEMA,Undersat,GL,Unsteady,bSolGOR,Incr,Incr
+Well_#2,MAKO,Unknown,Unknown,Unknown,Combo,Decr,Decr
+Well_#20,DEPU,Unknown,Unknown,Unknown,Unknown,Combo,Combo
+Well_#3,DEPU,Unknown,Unknown,Unknown,Unknown,Combo,Combo
+Well_#4,DEPU,Unknown,Unknown,Unknown,Unknown,Combo,Combo
+Well_#5,ACHI,Unknown,Unknown,Unknown,Unknown,Combo,Combo
+Well_#6,MAKO,Unknown,Unknown,Unknown,Combo,Decr,Decr
+Well_#7,,Unknown,Unknown,Unknown,Unknown,Unknown,Unknown
+Well_#8,DEPU,Unknown,Unknown,Unknown,Unknown,Combo,Combo
+Well_#9,,Unknown,Unknown,Unknown,Unknown,Unknown,Unknown
